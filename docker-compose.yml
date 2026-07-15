@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:19
+    image: postgres:latest
     container_name: ossie-demo-postgres
     environment:
       POSTGRES_DB: demo

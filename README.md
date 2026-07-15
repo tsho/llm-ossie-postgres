@@ -79,7 +79,7 @@ python src/demo.py "What are the top 3 stores by revenue?"
 ## Project Structure
 
 ```
-├── docker-compose.yml          # Postgres 19 container
+├── docker-compose.yml          # Postgres (latest) container
 ├── db/
 │   └── init.sql                # TPC-DS subset DDL + seed data
 ├── ossie/
