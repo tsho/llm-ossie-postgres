@@ -1,5 +1,17 @@
 # LLM + Apache Ossie + Postgres Demo
 
+## Requirements
+
+| Component | Version | Notes |
+|-----------|---------|-------|
+| Python | >= 3.11 | Managed with [uv](https://docs.astral.sh/uv/) |
+| PostgreSQL | 18+ (latest) | Docker (`postgres:latest`) or local install |
+| Docker | 24+ | Docker Compose V2 included |
+| LLM | Snowflake Cortex (`llama3.1-70b`) | Default provider; or local [Ollama](https://ollama.com/) |
+| Snowflake | Account with Cortex AI access | PAT token in `~/.snowflake/connections.toml` |
+
+---
+
 This demo shows how **Apache Ossie** (semantic model metadata) improves LLM-generated SQL accuracy when querying a PostgreSQL database.
 
 ## What This Demonstrates
@@ -17,14 +29,6 @@ The generated SQL is executed against Postgres, and results are compared side-by
 | "Total sales for June?" | May use `SUM(ss_sales_price)` (unit price) | Uses `SUM(ss_ext_sales_price)` (correct: qty * price) |
 | "Sales by brand?" | May miss JOIN to `item` table | Uses defined relationship `ss_item_sk → i_item_sk` |
 | "Customer LTV?" | Returns total sales (not per-customer) | Uses pre-defined metric: `SUM / COUNT(DISTINCT customer)` |
-
-## Prerequisites
-
-- Docker & Docker Compose (or local PostgreSQL)
-- Python 3.11+
-- One of:
-  - Snowflake account with Cortex AI access (default)
-  - [Ollama](https://ollama.com/) for local LLM inference
 
 ## Setup
 
