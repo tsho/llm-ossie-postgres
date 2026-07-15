@@ -11,6 +11,63 @@
 
 ---
 
+## Architecture
+
+```mermaid
+flowchart TB
+    subgraph input [Input]
+        Q[Natural Language Question]
+    end
+
+    subgraph withoutOssie [Without Ossie]
+        P1[System Prompt<br/>DDL Schema only]
+        LLM1[LLM<br/>Llama 3.1 70B]
+        SQL1[Generated SQL A]
+    end
+
+    subgraph withOssie [With Ossie]
+        YAML[retail_model.yaml<br/>Apache Ossie]
+        P2[System Prompt<br/>DDL Schema + Ossie YAML]
+        LLM2[LLM<br/>Llama 3.1 70B]
+        SQL2[Generated SQL B]
+    end
+
+    subgraph llmProvider [LLM Provider]
+        Cortex[Snowflake Cortex<br/>REST API]
+        Ollama[Ollama<br/>Local]
+    end
+
+    subgraph db [Database]
+        PG[(PostgreSQL 18<br/>Docker)]
+    end
+
+    subgraph output [Output]
+        R1[Result A]
+        R2[Result B]
+        CMP[Side-by-side<br/>Comparison]
+    end
+
+    Q --> P1
+    Q --> P2
+    YAML --> P2
+    P1 --> LLM1
+    P2 --> LLM2
+    LLM1 -.-> Cortex
+    LLM1 -.-> Ollama
+    LLM2 -.-> Cortex
+    LLM2 -.-> Ollama
+    LLM1 --> SQL1
+    LLM2 --> SQL2
+    SQL1 --> PG
+    SQL2 --> PG
+    PG --> R1
+    PG --> R2
+    R1 --> CMP
+    R2 --> CMP
+```
+
+---
+
 This demo shows how **Apache Ossie** (semantic model metadata) improves LLM-generated SQL accuracy when querying a PostgreSQL database.
 
 ## What This Demonstrates
