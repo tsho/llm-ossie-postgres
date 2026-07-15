@@ -7,8 +7,7 @@
 | Python | >= 3.11 | Managed with [uv](https://docs.astral.sh/uv/) |
 | PostgreSQL | 18+ (latest) | Docker (`postgres:latest`) or local install |
 | Docker | 24+ | Docker Compose V2 included |
-| LLM | Snowflake Cortex (`llama3.1-70b`) | Default provider; or local [Ollama](https://ollama.com/) |
-| Snowflake | Account with Cortex AI access | PAT token in `~/.snowflake/connections.toml` |
+| LLM | Any chat completion API | This demo uses Snowflake Cortex (`llama3.1-70b`) by default; also supports local [Ollama](https://ollama.com/). Any OpenAI-compatible API can be added. |
 
 ---
 
