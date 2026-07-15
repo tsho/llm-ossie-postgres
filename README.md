@@ -96,14 +96,14 @@ docker compose up -d
 # createdb demo && psql -d demo -f db/init.sql
 
 # 2. Install Python dependencies
-pip install -r requirements.txt
+uv sync
 
 # 3. Configure environment
 cp .env.example .env
 # Edit .env — set LLM_PROVIDER and Postgres connection
 
 # 4. Run the demo
-python src/demo.py
+uv run python src/demo.py
 ```
 
 ## LLM Providers
@@ -133,7 +133,7 @@ OLLAMA_BASE_URL=http://localhost:11434
 ## Custom Questions
 
 ```bash
-python src/demo.py "What are the top 3 stores by revenue?"
+uv run python src/demo.py "What are the top 3 stores by revenue?"
 ```
 
 ## Project Structure
@@ -148,7 +148,8 @@ python src/demo.py "What are the top 3 stores by revenue?"
 │   ├── demo.py                 # Main comparison script
 │   ├── llm_client.py           # LLM provider abstraction (Cortex / Ollama)
 │   └── db_client.py            # Postgres connection
-├── requirements.txt
+├── pyproject.toml              # Dependencies (managed with uv)
+├── uv.lock                     # Lockfile
 ├── .env.example
 └── README.md
 ```
