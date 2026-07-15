@@ -14,30 +14,114 @@
 
 ### Question 1: "What is the total sales revenue for June?"
 
-| | Without Ossie | With Ossie |
-|--|--|--|
-| SQL | `SELECT SUM(ss_ext_sales_price) FROM store_sales INNER JOIN date_dim ON store_sales.ss_sold_date_sk = date_dim.d_date_sk WHERE date_dim.d_month_name = 'June'` | `SELECT SUM(T2.ss_ext_sales_price) FROM date_dim AS T1 INNER JOIN store_sales AS T2 ON T1.d_date_sk = T2.ss_sold_date_sk WHERE T1.d_month_name = 'June'` |
-| Result | 1160.73 | 1160.73 |
-| Correct? | Yes | Yes |
-| Notes | Both used the correct column (`ss_ext_sales_price`) and joined to `date_dim`. The LLM inferred the join from foreign key constraints in the DDL. |
+**Without Ossie (DDL only):**
+
+```sql
+SELECT
+  SUM(ss_ext_sales_price)
+FROM
+  store_sales
+INNER JOIN
+  date_dim
+  ON store_sales.ss_sold_date_sk = date_dim.d_date_sk
+WHERE
+  date_dim.d_month_name = 'June'
+```
+
+Result: **1160.73** — Correct
+
+**With Ossie (DDL + Semantic Model):**
+
+```sql
+SELECT
+  SUM(T2.ss_ext_sales_price)
+FROM
+  date_dim AS T1
+INNER JOIN
+  store_sales AS T2
+  ON T1.d_date_sk = T2.ss_sold_date_sk
+WHERE
+  T1.d_month_name = 'June'
+```
+
+Result: **1160.73** — Correct
+
+> Both used the correct column (`ss_ext_sales_price`) and joined to `date_dim`.
+> The LLM inferred the join from foreign key constraints in the DDL.
+
+---
 
 ### Question 2: "Show me sales by brand."
 
-| | Without Ossie | With Ossie |
-|--|--|--|
-| SQL | `SELECT i.i_brand, SUM(ss.ss_ext_sales_price) AS total_sales FROM item i JOIN store_sales ss ON i.i_item_sk = ss.ss_item_sk GROUP BY i.i_brand` | `SELECT T2.i_brand, SUM(T1.ss_ext_sales_price) FROM store_sales AS T1 INNER JOIN item AS T2 ON T1.ss_item_sk = T2.i_item_sk GROUP BY T2.i_brand` |
-| Result | 8 brands, correct values | 8 brands, correct values |
-| Correct? | Yes | Yes |
-| Notes | Both correctly joined `store_sales` to `item` and grouped by brand. The foreign key constraint in DDL was sufficient for this case. |
+**Without Ossie (DDL only):**
+
+```sql
+SELECT
+  i.i_brand,
+  SUM(ss.ss_ext_sales_price) AS total_sales
+FROM
+  item i
+JOIN
+  store_sales ss
+  ON i.i_item_sk = ss.ss_item_sk
+GROUP BY
+  i.i_brand
+```
+
+Result: **8 brands, correct values** — Correct
+
+**With Ossie (DDL + Semantic Model):**
+
+```sql
+SELECT
+  T2.i_brand,
+  SUM(T1.ss_ext_sales_price)
+FROM
+  store_sales AS T1
+INNER JOIN
+  item AS T2
+  ON T1.ss_item_sk = T2.i_item_sk
+GROUP BY
+  T2.i_brand
+```
+
+Result: **8 brands, correct values** — Correct
+
+> Both correctly joined `store_sales` to `item` and grouped by brand.
+> The foreign key constraint in DDL was sufficient for this case.
+
+---
 
 ### Question 3: "What is the customer lifetime value?"
 
-| | Without Ossie | With Ossie |
-|--|--|--|
-| SQL | `SELECT SUM(ss_ext_sales_price) FROM store_sales` | `SELECT SUM(T1.ss_ext_sales_price) / COUNT(DISTINCT T1.ss_customer_sk) FROM store_sales AS T1` |
-| Result | **2693.37** | **538.67** |
-| Correct? | **No** — returns total revenue, not per-customer value | **Yes** — uses the metric definition from Ossie |
-| Notes | Without Ossie, the LLM has no definition of "customer lifetime value" and falls back to a simple sum. With Ossie, the `customer_lifetime_value` metric is defined as `SUM(ss_ext_sales_price) / COUNT(DISTINCT ss_customer_sk)`, which the LLM correctly applies. |
+**Without Ossie (DDL only):**
+
+```sql
+SELECT
+  SUM(ss_ext_sales_price)
+FROM
+  store_sales
+```
+
+Result: **2693.37** — **WRONG** (returns total revenue, not per-customer value)
+
+**With Ossie (DDL + Semantic Model):**
+
+```sql
+SELECT
+  SUM(T1.ss_ext_sales_price) / COUNT(DISTINCT T1.ss_customer_sk)
+FROM
+  store_sales AS T1
+```
+
+Result: **538.67** — **CORRECT** (uses the metric definition from Ossie)
+
+> Without Ossie, the LLM has no definition of "customer lifetime value"
+> and falls back to a simple sum. With Ossie, the `customer_lifetime_value`
+> metric is defined as `SUM(ss_ext_sales_price) / COUNT(DISTINCT ss_customer_sk)`,
+> which the LLM correctly applies.
+
+---
 
 ## Summary
 
@@ -45,7 +129,7 @@
 |----------|:---:|:---:|:---:|
 | Total sales for June | Correct | Correct | - |
 | Sales by brand | Correct | Correct | - |
-| Customer LTV | **Wrong** (total, not per-customer) | **Correct** | Ossie metric definition |
+| Customer LTV | **Wrong** | **Correct** | Ossie metric definition |
 
 ### Key Takeaway
 
