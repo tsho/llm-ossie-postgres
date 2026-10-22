@@ -5,6 +5,7 @@ Demonstrates how Apache Ossie's semantic model specification
 improves LLM-generated SQL accuracy against a Postgres database.
 """
 
+import logging
 import os
 import sys
 from pathlib import Path
@@ -16,6 +17,16 @@ from db_client import execute_query
 from llm_client import generate_sql
 
 load_dotenv(override=True)
+
+# File logger (prompts / debug info)
+LOG_PATH = Path(__file__).parent.parent / "demo.log"
+logging.basicConfig(
+    filename=LOG_PATH,
+    level=logging.DEBUG,
+    format="%(asctime)s %(levelname)s %(message)s",
+    encoding="utf-8",
+)
+logger = logging.getLogger(__name__)
 
 # Paths
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -135,6 +146,7 @@ def run_comparison(question: str, ossie_model: str):
 
     # Without Ossie
     prompt_without = SYSTEM_PROMPT_BASE.format(schema=DDL_SCHEMA)
+    logger.debug("Prompt (WITHOUT Ossie):\n%s", prompt_without)
     sql_without = generate_sql(prompt_without, question)
 
     print("\n--- WITHOUT Ossie (DDL only) ---")
@@ -147,6 +159,7 @@ def run_comparison(question: str, ossie_model: str):
     prompt_with = SYSTEM_PROMPT_WITH_OSSIE.format(
         schema=DDL_SCHEMA, ossie_model=ossie_model
     )
+    logger.debug("Prompt (WITH Ossie):\n%s", prompt_with)
     sql_with = generate_sql(prompt_with, question)
 
     print("\n--- WITH Ossie (DDL + Semantic Model) ---")
